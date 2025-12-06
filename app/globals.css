@@ -1,0 +1,137 @@
+@import "tailwindcss";
+
+:root {
+  /* Theme Colors - Easily customizable */
+  --color-primary: #0055ff;
+  --color-primary-dark: #0044cc;
+  --color-secondary: #6c757d;
+  --color-accent: #ff6b35;
+  --color-success: #28a745;
+  --color-danger: #dc3545;
+  --color-warning: #ffc107;
+  --color-info: #17a2b8;
+  
+  /* Background Colors - Light Theme (Default) */
+  --background: #ffffff;
+  --background-secondary: #f8f9fa;
+  --foreground: #171717;
+  --foreground-secondary: #6c757d;
+  
+  /* Border Colors */
+  --border-color: #e5e7eb;
+  --border-color-secondary: #d1d5db;
+  
+  /* Font Settings - Easily customizable */
+  --font-body: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-heading: var(--font-body);
+  --font-size-base: 16px;
+  --font-size-sm: 14px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  
+  /* Shadows - Light Theme */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-accent: var(--color-accent);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Dark Theme */
+.dark {
+  --background: #0a0a0a;
+  --background-secondary: #1a1a1a;
+  --foreground: #ededed;
+  --foreground-secondary: #9ca3af;
+  --border-color: #374151;
+  --border-color-secondary: #4b5563;
+  
+  /* Adjusted shadows for dark theme */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  
+  /* Slightly adjusted colors for better contrast in dark mode */
+  --color-primary: #3b82f6;
+  --color-primary-dark: #2563eb;
+  --color-secondary: #9ca3af;
+}
+
+/* System preference fallback (for initial load before JS runs) */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --background: #0a0a0a;
+    --background-secondary: #1a1a1a;
+    --foreground: #ededed;
+    --foreground-secondary: #9ca3af;
+    --border-color: #374151;
+    --border-color-secondary: #4b5563;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    --color-primary: #3b82f6;
+    --color-primary-dark: #2563eb;
+    --color-secondary: #9ca3af;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+}
+
+/* Utility classes for easy theming */
+.text-primary {
+  color: var(--color-primary);
+}
+
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.border-primary {
+  border-color: var(--color-primary);
+}
+
+.border-theme {
+  border-color: var(--border-color);
+}
+
+/* Logo placeholder - can be replaced with actual logo */
+.logo-placeholder {
+  width: 150px;
+  height: 50px;
+  background-color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  border-radius: var(--radius-md);
+}
