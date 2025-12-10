@@ -246,6 +246,12 @@ export const adminApi = {
 };
 
 // Video completion API
+export interface VideoCompletionResponse {
+  is_completed: boolean;
+  progress_percentage: number;
+  completion?: any | null;
+}
+
 export const videoCompletionApi = {
   updateProgress: (chapterId: number, data: {
     submission_id: number;
@@ -258,7 +264,7 @@ export const videoCompletionApi = {
     total_seconds?: number;
   }) => apiClient.post(`/chapters/${chapterId}/video/complete`, data),
   checkCompletion: (chapterId: number, submissionId: number) =>
-    apiClient.get(`/chapters/${chapterId}/video/completion?submission_id=${submissionId}`),
+    apiClient.get<VideoCompletionResponse>(`/chapters/${chapterId}/video/completion?submission_id=${submissionId}`),
 };
 
 // User progress API
