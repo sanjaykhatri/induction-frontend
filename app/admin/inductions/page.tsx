@@ -13,6 +13,7 @@ export default function AdminInductionsPage() {
   const [inductions, setInductions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [editingInduction, setEditingInduction] = useState<any>(null);
   const [formData, setFormData] = useState({
     title: '',
@@ -20,6 +21,8 @@ export default function AdminInductionsPage() {
     is_active: true,
     display_order: 0,
   });
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -55,6 +58,21 @@ export default function AdminInductionsPage() {
       display_order: 0,
     });
     setShowModal(true);
+  };
+
+  const handleImport = async () => {
+    if (!importFile) return;
+    setImporting(true);
+    try {
+      await adminInductionApi.importCsv(importFile);
+      setShowImportModal(false);
+      setImportFile(null);
+      loadInductions();
+    } catch (error: any) {
+      alert(error.message || 'Failed to import CSV');
+    } finally {
+      setImporting(false);
+    }
   };
 
   const handleEdit = (induction: any) => {
@@ -99,6 +117,7 @@ export default function AdminInductionsPage() {
   }
 
   return (
+    <>
     <div className="min-h-screen bg-background-secondary">
       <header className="bg-background shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -129,7 +148,10 @@ export default function AdminInductionsPage() {
         <PageContainer
           title="Manage Inductions"
           actions={
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowImportModal(true)}>Import CSV</Button>
             <Button onClick={handleCreate}>New Induction</Button>
+          </div>
           }
           maxWidth="full"
         >
@@ -234,6 +256,45 @@ export default function AdminInductionsPage() {
         </Modal>
       </main>
     </div>
+
+    <Modal
+      isOpen={showImportModal}
+      onClose={() => {
+        setShowImportModal(false);
+        setImportFile(null);
+      }}
+      title="Import Induction from CSV"
+      footer={
+        <>
+          <Button variant="outline" onClick={() => {
+            setShowImportModal(false);
+            setImportFile(null);
+          }}>Cancel</Button>
+          <Button onClick={handleImport} loading={importing} disabled={!importFile}>
+            Import
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-3">
+        <Input
+          type="file"
+          accept=".csv,text/csv"
+          label="CSV File"
+          onChange={(e) => {
+            const file = e.target.files?.[0] || null;
+            setImportFile(file);
+          }}
+        />
+        <p className="text-sm text-foreground-secondary">
+          Expected columns: induction_title, induction_description, induction_is_active, induction_display_order,
+          chapter_title, chapter_description, chapter_video_url, chapter_display_order, pass_percentage,
+          question_text, question_type (text|single_choice|multi_choice), question_options (pipe separated or JSON),
+          question_correct_answer (pipe separated), question_display_order.
+        </p>
+      </div>
+    </Modal>
+    </>
   );
 }
 

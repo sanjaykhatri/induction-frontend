@@ -217,6 +217,11 @@ export const adminInductionApi = {
   delete: (id: number) => apiClient.delete(`/admin/inductions/${id}`),
   reorder: (id: number, displayOrder: number) =>
     apiClient.post(`/admin/inductions/${id}/reorder`, { display_order: displayOrder }),
+  importCsv: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient.upload(`/admin/inductions/import`, formData, 'POST');
+  },
 };
 
 export const adminChapterApi = {
