@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '../../providers';
+import { Card, Input, Button, Alert } from '@/components/ui';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -31,7 +33,7 @@ export default function AdminLoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background-secondary px-4">
-      <div className="max-w-md w-full bg-background p-8 rounded-lg shadow-lg">
+      <Card className="max-w-md w-full" padding="lg">
         <div className="text-center mb-8">
           <div className="logo-placeholder mx-auto mb-4">LOGO</div>
           <h1 className="text-3xl font-bold text-foreground">Admin Login</h1>
@@ -40,59 +42,43 @@ export default function AdminLoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <Alert variant="danger" title="Error">
               {error}
-            </div>
+            </Alert>
           )}
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
-              Email Address *
-            </label>
-            <input
-              type="email"
-              id="email"
-              required
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-2 border border-theme rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="admin@example.com"
-            />
-          </div>
+          <Input
+            label="Email Address"
+            type="email"
+            required
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            placeholder="admin@example.com"
+          />
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
-              Password *
-            </label>
-            <input
-              type="password"
-              id="password"
-              required
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-4 py-2 border border-theme rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="Enter your password"
-            />
-          </div>
+          <Input
+            label="Password"
+            type="password"
+            required
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            placeholder="Enter your password"
+          />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
+          <Button type="submit" fullWidth loading={loading}>
+            Sign In
+          </Button>
         </form>
 
         <div className="mt-6 text-center">
           <p className="text-sm text-foreground-secondary">
             Regular user?{' '}
-            <a href="/login" className="text-primary hover:text-primary-dark font-medium">
+            <Link href="/login" className="text-primary hover:text-primary-dark font-medium">
               Go to user login
-            </a>
+            </Link>
           </p>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

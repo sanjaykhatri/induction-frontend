@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '../../../providers';
 import { adminSubmissionApi } from '@/lib/api';
+import { LoadingSpinner, Card, Badge, PageContainer, Button } from '@/components/ui';
 
 export default function SubmissionDetailPage() {
   const router = useRouter();
@@ -81,14 +83,7 @@ export default function SubmissionDetailPage() {
   };
 
   if (authLoading || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-foreground-secondary">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen text="Loading..." />;
   }
 
   if (!submissionData) {
@@ -109,22 +104,19 @@ export default function SubmissionDetailPage() {
             <div className="logo-placeholder">LOGO</div>
             <div className="flex items-center gap-4">
               <nav className="flex gap-4">
-                <a href="/admin/dashboard" className="text-foreground-secondary hover:text-foreground">Dashboard</a>
-                <a href="/admin/inductions" className="text-foreground-secondary hover:text-foreground">Inductions</a>
-                <a href="/admin/submissions" className="text-primary font-medium">Submissions</a>
-                <a href="/admin/admins" className="text-foreground-secondary hover:text-foreground">Admins</a>
+                <Link href="/admin/dashboard" className="text-foreground-secondary hover:text-foreground">Dashboard</Link>
+                <Link href="/admin/inductions" className="text-foreground-secondary hover:text-foreground">Inductions</Link>
+                <Link href="/admin/submissions" className="text-primary font-medium">Submissions</Link>
+                <Link href="/admin/admins" className="text-foreground-secondary hover:text-foreground">Admins</Link>
               </nav>
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <p className="font-medium text-foreground">{user?.name}</p>
                   <p className="text-sm text-foreground-secondary">{user?.email}</p>
                 </div>
-                <button
-                  onClick={logout}
-                  className="px-4 py-2 text-sm text-foreground-secondary hover:text-foreground border border-gray-300 rounded-md hover:bg-background-secondary transition-colors"
-                >
+                <Button variant="outline" size="sm" onClick={logout}>
                   Logout
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -132,15 +124,18 @@ export default function SubmissionDetailPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <a href="/admin/submissions" className="text-primary hover:text-primary-dark mb-4 inline-block">
-            ← Back to Submissions
-          </a>
-          <h1 className="text-3xl font-bold text-foreground">Submission Details</h1>
-        </div>
+        <PageContainer
+          title="Submission Details"
+          maxWidth="full"
+        >
+          <div className="mb-6">
+            <Link href="/admin/submissions" className="text-primary hover:text-primary-dark mb-4 inline-block">
+              ← Back to Submissions
+            </Link>
+          </div>
 
-        {/* User Details */}
-        <div className="bg-background rounded-lg shadow-md p-6 mb-6">
+          {/* User Details */}
+          <Card className="mb-6">
           <h2 className="text-xl font-semibold text-foreground mb-4">User Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -160,10 +155,10 @@ export default function SubmissionDetailPage() {
               <p className="font-medium text-foreground">{submission.user?.vantage_card_number || 'N/A'}</p>
             </div>
           </div>
-        </div>
+          </Card>
 
-        {/* Statistics */}
-        <div className="bg-background rounded-lg shadow-md p-6 mb-6">
+          {/* Statistics */}
+          <Card className="mb-6">
           <h2 className="text-xl font-semibold text-foreground mb-4">Statistics</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
@@ -187,10 +182,10 @@ export default function SubmissionDetailPage() {
               <p className="text-sm text-foreground-secondary">Score</p>
             </div>
           </div>
-        </div>
+          </Card>
 
-        {/* Submission Info */}
-        <div className="bg-background rounded-lg shadow-md p-6 mb-6">
+          {/* Submission Info */}
+          <Card className="mb-6">
           <h2 className="text-xl font-semibold text-foreground mb-4">Submission Information</h2>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -199,17 +194,17 @@ export default function SubmissionDetailPage() {
             </div>
             <div>
               <p className="text-sm text-foreground-secondary">Status</p>
-              <span
-                className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+              <Badge
+                variant={
                   submission.status === 'completed'
-                    ? 'bg-green-100 text-green-800'
+                    ? 'success'
                     : submission.status === 'pending'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-blue-100 text-blue-800'
-                }`}
+                    ? 'warning'
+                    : 'info'
+                }
               >
                 {submission.status === 'completed' ? 'Completed' : submission.status === 'pending' ? 'Pending' : 'In Progress'}
-              </span>
+              </Badge>
             </div>
             <div>
               <p className="text-sm text-foreground-secondary">Started At</p>
@@ -224,54 +219,45 @@ export default function SubmissionDetailPage() {
               </p>
             </div>
           </div>
-        </div>
+          </Card>
 
-        {/* Questions and Answers */}
-        <div className="bg-background rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Questions & Answers</h2>
-          <div className="space-y-6">
-            {questions.map((q: any, index: number) => (
-              <div
-                key={q.question_id}
-                className={`border rounded-lg p-4 ${
-                  q.is_correct
-                    ? 'border-green-300 bg-green-50'
-                    : q.is_answered
-                    ? 'border-red-300 bg-red-50'
-                    : 'border-gray-300 bg-gray-50'
-                }`}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-medium text-foreground-secondary">
-                        Question {index + 1}
-                      </span>
-                      <span className="text-xs px-2 py-1 rounded bg-background-secondary">
-                        {q.chapter_title}
-                      </span>
-                      <span className="text-xs px-2 py-1 rounded bg-background-secondary">
-                        {q.question_type}
-                      </span>
-                      {q.is_correct && (
-                        <span className="text-xs px-2 py-1 rounded bg-green-200 text-green-800">
-                          ✓ Correct
+          {/* Questions and Answers */}
+          <Card>
+            <h2 className="text-xl font-semibold text-foreground mb-4">Questions & Answers</h2>
+            <div className="space-y-6">
+              {questions.map((q: any, index: number) => (
+                <Card
+                  key={q.question_id}
+                  className={
+                    q.is_correct
+                      ? 'border-green-300 bg-green-50'
+                      : q.is_answered
+                      ? 'border-red-300 bg-red-50'
+                      : 'border-gray-300 bg-gray-50'
+                  }
+                  padding="md"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className="text-sm font-medium text-foreground-secondary">
+                          Question {index + 1}
                         </span>
-                      )}
-                      {q.is_answered && !q.is_correct && (
-                        <span className="text-xs px-2 py-1 rounded bg-red-200 text-red-800">
-                          ✗ Wrong
-                        </span>
-                      )}
-                      {!q.is_answered && (
-                        <span className="text-xs px-2 py-1 rounded bg-yellow-200 text-yellow-800">
-                          Not Answered
-                        </span>
-                      )}
+                        <Badge variant="default" className="text-xs">{q.chapter_title}</Badge>
+                        <Badge variant="default" className="text-xs">{q.question_type}</Badge>
+                        {q.is_correct && (
+                          <Badge variant="success">✓ Correct</Badge>
+                        )}
+                        {q.is_answered && !q.is_correct && (
+                          <Badge variant="danger">✗ Wrong</Badge>
+                        )}
+                        {!q.is_answered && (
+                          <Badge variant="warning">Not Answered</Badge>
+                        )}
+                      </div>
+                      <p className="font-medium text-foreground mb-3">{q.question_text}</p>
                     </div>
-                    <p className="font-medium text-foreground mb-3">{q.question_text}</p>
                   </div>
-                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                   <div>
@@ -309,10 +295,11 @@ export default function SubmissionDetailPage() {
                     </div>
                   </div>
                 )}
-              </div>
-            ))}
-          </div>
-        </div>
+                </Card>
+              ))}
+            </div>
+          </Card>
+        </PageContainer>
       </main>
     </div>
   );

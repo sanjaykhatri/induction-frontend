@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '../../../../../providers';
 import { submissionApi, videoCompletionApi, SubmitAnswersResponse } from '@/lib/api';
 import Header from '@/components/Header';
+import { LoadingSpinner, Button, Card, Input, PageContainer } from '@/components/ui';
 
 export default function QuestionsPage() {
   const router = useRouter();
@@ -250,14 +251,7 @@ export default function QuestionsPage() {
   };
 
   if (loading || checkingVideo) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-foreground-secondary">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen text="Loading..." />;
   }
 
   if (!currentChapter || !videoCompleted) {
@@ -281,38 +275,34 @@ export default function QuestionsPage() {
                 <p className="font-medium text-foreground">{user?.name}</p>
                 <p className="text-sm text-foreground-secondary">{user?.email}</p>
               </div>
-              <button
-                onClick={logout}
-                className="px-4 py-2 text-sm text-foreground-secondary hover:text-foreground border border-theme rounded-md hover:bg-background-secondary transition-colors"
-              >
+              <Button variant="outline" size="sm" onClick={logout}>
                 Logout
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold text-foreground mb-6">
-          Questions: {currentChapter.title}
-        </h1>
-
-        <div className="bg-background rounded-lg shadow-md p-6 space-y-6">
+      <PageContainer
+        title={`Questions: ${currentChapter.title}`}
+        maxWidth="lg"
+      >
+        <Card className="space-y-6">
           {questions.length === 0 ? (
             <p className="text-foreground-secondary">No questions for this chapter.</p>
           ) : (
             questions.map((question: any) => (
-              <div key={question.id} className="border-b pb-6 last:border-b-0 last:pb-0">
+              <Card key={question.id} className="border-b pb-6 last:border-b-0 last:pb-0" padding="none">
                 <h3 className="text-lg font-semibold text-foreground mb-4">
                   {question.question_text}
                 </h3>
 
                 {question.type === 'text' ? (
-                  <textarea
+                  <Input
+                    as="textarea"
+                    rows={4}
                     value={answers[question.id] || ''}
                     onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                    className="w-full px-4 py-2 border border-theme rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                    rows={4}
                     placeholder="Enter your answer..."
                   />
                 ) : question.type === 'single_choice' ? (
@@ -358,25 +348,24 @@ export default function QuestionsPage() {
                     ))}
                   </div>
                 ) : null}
-              </div>
+              </Card>
             ))
           )}
 
           <div className="pt-6">
-            <button
+            <Button
               onClick={handleSubmit}
               disabled={submitting || questions.length === 0}
-              className="w-full bg-primary text-white py-2 px-6 rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              fullWidth
+              loading={submitting}
             >
-              {submitting
-                ? 'Submitting...'
-                : submission?.induction_snapshot?.chapters?.[chapterIndex + 1]
+              {submission?.induction_snapshot?.chapters?.[chapterIndex + 1]
                 ? 'Next Chapter'
                 : 'Complete Induction'}
-            </button>
+            </Button>
           </div>
-        </div>
-      </main>
+        </Card>
+      </PageContainer>
     </div>
   );
 }

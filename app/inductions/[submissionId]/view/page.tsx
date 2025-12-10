@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '../../../providers';
 import { submissionApi } from '@/lib/api';
 import Header from '@/components/Header';
+import { LoadingSpinner, Card, Badge, PageContainer, Button, Alert } from '@/components/ui';
 
 export default function ViewCompletedInductionPage() {
   const router = useRouter();
@@ -180,14 +181,7 @@ export default function ViewCompletedInductionPage() {
   };
 
   if (authLoading || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-foreground-secondary">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen text="Loading..." />;
   }
 
   if (!submission || submission.status !== 'completed') {
@@ -195,12 +189,11 @@ export default function ViewCompletedInductionPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <p className="text-foreground-secondary">Submission not found or not completed.</p>
-          <button
+          <Button
             onClick={() => router.push('/inductions')}
-            className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
           >
             Back to Inductions
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -222,9 +215,7 @@ export default function ViewCompletedInductionPage() {
           <div className="flex items-center gap-4 flex-wrap">
             {submission.status === 'completed' ? (
               <>
-                <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-semibold rounded-full">
-                  ✓ Completed
-                </span>
+                <Badge variant="success">✓ Completed</Badge>
                 {submission.completed_at && (
                   <span className="text-sm text-foreground-secondary">
                     Completed on: {new Date(submission.completed_at).toLocaleDateString()}
@@ -232,17 +223,15 @@ export default function ViewCompletedInductionPage() {
                 )}
               </>
             ) : (
-              <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-semibold rounded-full">
-                ⏳ New Chapters Available
-              </span>
+              <Badge variant="warning">⏳ New Chapters Available</Badge>
             )}
             {hasNewChapters && (
-              <button
+              <Button
+                size="sm"
                 onClick={() => router.push(`/inductions/${submissionId}/chapter/1`)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
               >
                 Complete New Chapters
-              </button>
+              </Button>
             )}
           </div>
         </div>
@@ -250,35 +239,32 @@ export default function ViewCompletedInductionPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Chapter Navigation */}
           <div className="lg:col-span-1">
-            <div className="bg-background rounded-lg shadow-md p-4 sticky top-4">
+            <Card className="sticky top-4" padding="md">
               <h2 className="text-lg font-semibold text-foreground mb-4">Chapters</h2>
               <div className="space-y-2">
                 {chapters.map((chapter: any, index: number) => (
-                  <button
+                  <Button
                     key={chapter.id}
+                    variant={selectedChapterIndex === index ? 'primary' : 'outline'}
+                    size="sm"
+                    fullWidth
                     onClick={() => setSelectedChapterIndex(index)}
-                    className={`w-full text-left p-3 rounded-md transition-colors ${
-                      selectedChapterIndex === index
-                        ? 'bg-primary text-white'
-                        : 'bg-background-secondary hover:bg-background-secondary-dark'
-                    }`}
+                    className="justify-start"
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">
-                        {index + 1}. {chapter.title}
-                      </span>
-                      <span className="ml-auto text-xs">✓</span>
-                    </div>
-                  </button>
+                    <span className="text-sm font-medium">
+                      {index + 1}. {chapter.title}
+                    </span>
+                    <span className="ml-auto text-xs">✓</span>
+                  </Button>
                 ))}
               </div>
-            </div>
+            </Card>
           </div>
 
           {/* Chapter Content */}
           <div className="lg:col-span-3">
             {currentChapter ? (
-              <div className="bg-background rounded-lg shadow-md p-6">
+              <Card>
                 <h2 className="text-2xl font-bold text-foreground mb-4">
                   {currentChapter.title}
                 </h2>
@@ -290,7 +276,7 @@ export default function ViewCompletedInductionPage() {
                 {currentChapter.video_url && (
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold text-foreground mb-2">Video</h3>
-                    <div className="bg-background-secondary rounded-lg p-4">
+                    <Card className="bg-background-secondary" padding="md">
                       <video
                         controls
                         className="w-full rounded-md"
@@ -298,7 +284,7 @@ export default function ViewCompletedInductionPage() {
                       >
                         Your browser does not support the video tag.
                       </video>
-                    </div>
+                    </Card>
                   </div>
                 )}
 
@@ -314,30 +300,25 @@ export default function ViewCompletedInductionPage() {
                         const isCorrect = userAnswer ? compareAnswers(question, userAnswer) : false;
 
                         return (
-                          <div
+                          <Card
                             key={question.id}
-                            className={`border rounded-lg p-4 ${
+                            className={
                               isCorrect
                                 ? 'border-green-300 bg-green-50'
                                 : userAnswer
                                 ? 'border-red-300 bg-red-50'
                                 : 'border-gray-300 bg-gray-50'
-                            }`}
+                            }
+                            padding="md"
                           >
                             <div className="flex items-start justify-between mb-2">
                               <h4 className="font-medium text-foreground">
                                 Question {qIndex + 1}: {question.question_text}
                               </h4>
                               {userAnswer && (
-                                <span
-                                  className={`px-2 py-1 text-xs font-semibold rounded ${
-                                    isCorrect
-                                      ? 'bg-green-200 text-green-800'
-                                      : 'bg-red-200 text-red-800'
-                                  }`}
-                                >
+                                <Badge variant={isCorrect ? 'success' : 'danger'}>
                                   {isCorrect ? '✓ Correct' : '✗ Incorrect'}
-                                </span>
+                                </Badge>
                               )}
                             </div>
 
@@ -406,17 +387,17 @@ export default function ViewCompletedInductionPage() {
                                 </p>
                               )}
                             </div>
-                          </div>
+                          </Card>
                         );
                       })}
                     </div>
                   </div>
                 )}
-              </div>
+              </Card>
             ) : (
-              <div className="bg-background rounded-lg shadow-md p-8 text-center">
+              <Card className="text-center" padding="lg">
                 <p className="text-foreground-secondary">No chapter selected</p>
-              </div>
+              </Card>
             )}
           </div>
         </div>

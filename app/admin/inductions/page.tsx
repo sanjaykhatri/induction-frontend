@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '../../providers';
 import { adminInductionApi } from '@/lib/api';
+import { LoadingSpinner, Button, Badge, Modal, Input, PageContainer, Card } from '@/components/ui';
 
 export default function AdminInductionsPage() {
   const router = useRouter();
@@ -93,14 +95,7 @@ export default function AdminInductionsPage() {
   };
 
   if (authLoading || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-foreground-secondary">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen text="Loading..." />;
   }
 
   return (
@@ -111,22 +106,19 @@ export default function AdminInductionsPage() {
             <div className="logo-placeholder">LOGO</div>
             <div className="flex items-center gap-4">
               <nav className="flex gap-4">
-                <a href="/admin/dashboard" className="text-foreground-secondary hover:text-foreground">Dashboard</a>
-                <a href="/admin/inductions" className="text-primary font-medium">Inductions</a>
-                <a href="/admin/submissions" className="text-foreground-secondary hover:text-foreground">Submissions</a>
-                <a href="/admin/admins" className="text-foreground-secondary hover:text-foreground">Admins</a>
+                <Link href="/admin/dashboard" className="text-foreground-secondary hover:text-foreground">Dashboard</Link>
+                <Link href="/admin/inductions" className="text-primary font-medium">Inductions</Link>
+                <Link href="/admin/submissions" className="text-foreground-secondary hover:text-foreground">Submissions</Link>
+                <Link href="/admin/admins" className="text-foreground-secondary hover:text-foreground">Admins</Link>
               </nav>
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <p className="font-medium text-foreground">{user?.name}</p>
                   <p className="text-sm text-foreground-secondary">{user?.email}</p>
                 </div>
-                <button
-                  onClick={logout}
-                  className="px-4 py-2 text-sm text-foreground-secondary hover:text-foreground border border-gray-300 rounded-md hover:bg-background-secondary transition-colors"
-                >
+                <Button variant="outline" size="sm" onClick={logout}>
                   Logout
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -134,17 +126,14 @@ export default function AdminInductionsPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Manage Inductions</h1>
-          <button
-            onClick={handleCreate}
-            className="bg-primary text-white py-2 px-6 rounded-md hover:bg-primary-dark transition-colors"
-          >
-            New Induction
-          </button>
-        </div>
-
-        <div className="bg-background rounded-lg shadow-md overflow-hidden">
+        <PageContainer
+          title="Manage Inductions"
+          actions={
+            <Button onClick={handleCreate}>New Induction</Button>
+          }
+          maxWidth="full"
+        >
+          <Card padding="none" className="overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-background-secondary">
               <tr>
@@ -172,116 +161,77 @@ export default function AdminInductionsPage() {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        induction.is_active
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
+                    <Badge variant={induction.is_active ? 'success' : 'default'}>
                       {induction.is_active ? 'Active' : 'Inactive'}
-                    </span>
+                    </Badge>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground-secondary">
                     {induction.display_order}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a
-                      href={`/admin/inductions/${induction.id}`}
-                      className="text-primary hover:text-primary-dark mr-4"
-                    >
-                      Manage
-                    </a>
-                    <button
-                      onClick={() => handleEdit(induction)}
-                      className="text-primary hover:text-primary-dark mr-4"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(induction.id)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <Link href={`/admin/inductions/${induction.id}`}>
+                        <Button variant="outline" size="sm">Manage</Button>
+                      </Link>
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(induction)}>
+                        Edit
+                      </Button>
+                      <Button variant="danger" size="sm" onClick={() => handleDelete(induction.id)}>
+                        Delete
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
+          </Card>
+        </PageContainer>
 
-        {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-background rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
-              <h2 className="text-2xl font-bold text-foreground mb-4">
-                {editingInduction ? 'Edit Induction' : 'New Induction'}
-              </h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Title *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={formData.is_active}
-                      onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                      className="mr-2"
-                    />
-                    <span className="text-sm text-foreground">Active</span>
-                  </label>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Display Order
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.display_order}
-                    onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-                <div className="flex gap-4">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark transition-colors"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
+        <Modal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          title={editingInduction ? 'Edit Induction' : 'New Induction'}
+          footer={
+            <>
+              <Button variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
+              <Button type="submit" form="induction-form">Save</Button>
+            </>
+          }
+        >
+          <form id="induction-form" onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Title"
+              type="text"
+              required
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            />
+            <Input
+              label="Description"
+              as="textarea"
+              rows={3}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="is_active"
+                checked={formData.is_active}
+                onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                className="mr-2"
+              />
+              <label htmlFor="is_active" className="text-sm text-foreground">Active</label>
             </div>
-          </div>
-        )}
+            <Input
+              label="Display Order"
+              type="number"
+              value={formData.display_order}
+              onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
+            />
+          </form>
+        </Modal>
       </main>
     </div>
   );

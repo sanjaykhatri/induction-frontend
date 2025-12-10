@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '../../../../providers';
 import { submissionApi, videoCompletionApi } from '@/lib/api';
 import VideoPlayer from '@/components/VideoPlayer';
 import Header from '@/components/Header';
+import { LoadingSpinner, Button, Card, PageContainer } from '@/components/ui';
 
 export default function ChapterPage() {
   const router = useRouter();
@@ -146,22 +148,13 @@ export default function ChapterPage() {
   };
 
   if (loading || checkingCompletion) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-foreground-secondary">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen text="Loading..." />;
   }
 
   if (!currentChapter) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-foreground-secondary">Chapter not found</p>
-        </div>
+        <p className="text-foreground-secondary">Chapter not found</p>
       </div>
     );
   }
@@ -181,19 +174,16 @@ export default function ChapterPage() {
           <div className="flex justify-between items-center">
             <div className="logo-placeholder">LOGO</div>
             <div className="flex items-center gap-4">
-              <a href="/progress" className="text-primary hover:text-primary-dark">
+              <Link href="/progress" className="text-primary hover:text-primary-dark">
                 My Progress
-              </a>
+              </Link>
               <div className="text-right">
                 <p className="font-medium text-foreground">{user?.name}</p>
                 <p className="text-sm text-foreground-secondary">{user?.email}</p>
               </div>
-              <button
-                onClick={logout}
-                className="px-4 py-2 text-sm text-foreground-secondary hover:text-foreground border border-theme rounded-md hover:bg-background-secondary transition-colors"
-              >
+              <Button variant="outline" size="sm" onClick={logout}>
                 Logout
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -216,43 +206,34 @@ export default function ChapterPage() {
                 disabled={false}
               />
             ) : (
-              <div className="bg-background rounded-lg shadow-md p-8 text-center">
+              <Card className="text-center" padding="lg">
                 <p className="text-foreground-secondary">No video available for this chapter.</p>
-              </div>
+              </Card>
             )}
 
             <div className="mt-6">
-              <button
+              <Button
                 onClick={handleContinue}
                 disabled={!videoCompleted}
-                className={`py-2 px-6 rounded-md transition-colors ${
-                  videoCompleted
-                    ? 'bg-primary text-white hover:bg-primary-dark'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                fullWidth
               >
                 {videoCompleted ? 'Continue to Questions' : 'Complete Video to Continue'}
-              </button>
+              </Button>
             </div>
           </div>
 
           <div className="lg:col-span-1">
-            <div className="bg-background rounded-lg shadow-md p-6">
+            <Card>
               <h2 className="text-lg font-semibold text-foreground mb-4">Chapter Progress</h2>
               <div className="space-y-2">
                 {submission?.induction_snapshot?.chapters?.map((chapter: any, index: number) => {
                   const isCurrent = index === chapterIndex;
                   const isCompleted = index < chapterIndex;
                   return (
-                    <div
+                    <Card
                       key={chapter.id}
-                      className={`p-3 rounded ${
-                        isCurrent
-                          ? 'bg-primary text-white'
-                          : isCompleted
-                          ? 'bg-green-50 border border-green-200'
-                          : 'bg-gray-50'
-                      }`}
+                      className={isCurrent ? 'bg-primary text-white' : isCompleted ? 'bg-green-50 border-green-200' : ''}
+                      padding="sm"
                     >
                       <div className="flex items-center gap-2">
                         {isCompleted && (
@@ -262,11 +243,11 @@ export default function ChapterPage() {
                           {index + 1}. {chapter.title}
                         </span>
                       </div>
-                    </div>
+                    </Card>
                   );
                 })}
               </div>
-            </div>
+            </Card>
           </div>
         </div>
       </main>

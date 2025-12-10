@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '../../providers';
 import { adminSubmissionApi } from '@/lib/api';
 import AdminHeader from '@/components/AdminHeader';
+import { LoadingSpinner, Card, Button, PageContainer } from '@/components/ui';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -50,49 +51,40 @@ export default function AdminDashboard() {
   };
 
   if (authLoading || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-foreground-secondary">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen text="Loading..." />;
   }
 
   return (
     <div className="min-h-screen bg-background-secondary">
       <AdminHeader />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-foreground mb-8">Admin Dashboard</h1>
-
+      <PageContainer
+        title="Admin Dashboard"
+        maxWidth="full"
+      >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-background rounded-lg shadow-md p-6">
+          <Card>
             <h3 className="text-lg font-semibold text-foreground-secondary mb-2">Total Submissions</h3>
             <p className="text-3xl font-bold text-foreground">{stats.totalSubmissions}</p>
-          </div>
+          </Card>
 
-          <div className="bg-background rounded-lg shadow-md p-6">
+          <Card>
             <h3 className="text-lg font-semibold text-foreground-secondary mb-2">Completed</h3>
             <p className="text-3xl font-bold text-green-600">{stats.completedSubmissions}</p>
-          </div>
+          </Card>
 
-          <div className="bg-background rounded-lg shadow-md p-6">
+          <Card>
             <h3 className="text-lg font-semibold text-foreground-secondary mb-2">In Progress</h3>
             <p className="text-3xl font-bold text-yellow-600">{stats.inProgressSubmissions}</p>
-          </div>
+          </Card>
         </div>
 
         <div className="mt-8">
-          <Link
-            href="/admin/inductions"
-            className="inline-block bg-primary text-white py-2 px-6 rounded-md hover:bg-primary-dark transition-colors"
-          >
-            Manage Inductions
+          <Link href="/admin/inductions">
+            <Button>Manage Inductions</Button>
           </Link>
         </div>
-      </main>
+      </PageContainer>
     </div>
   );
 }

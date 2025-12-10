@@ -4,11 +4,25 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../providers';
 import { userProgressApi } from '@/lib/api';
+import Header from '@/components/Header';
+import { LoadingSpinner, Card, Button, Badge, ProgressBar, EmptyState, PageContainer } from '@/components/ui';
 
 export default function ProgressPage() {
   const router = useRouter();
-  const { user, loading: authLoading, logout } = useAuth();
-  const [progress, setProgress] = useState<any[]>([]);
+  const { user, loading: authLoading } = useAuth();
+  const [progress, setProgress] = useState<Array<{
+    submission_id: number;
+    induction: { title: string; description?: string };
+    status: string;
+    progress: { completion_percentage: number; completed_chapters: number; total_chapters: number };
+    chapters: Array<{
+      id: number;
+      title: string;
+      is_completed: boolean;
+      completed_at?: string;
+      progress_percentage: number;
+    }>;
+  }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,37 +55,28 @@ export default function ProgressPage() {
   };
 
   if (authLoading || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-foreground-secondary">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen text="Loading..." />;
   }
 
-      return (
-        <div className="min-h-screen bg-background-secondary">
-          <Header showProgress={true} showInductions={true} />
+  return (
+    <div className="min-h-screen bg-background-secondary">
+      <Header showProgress={true} showInductions={true} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-foreground mb-8">My Progress</h1>
-
+      <PageContainer title="My Progress" maxWidth="full">
         {progress.length === 0 ? (
-          <div className="bg-background rounded-lg shadow-md p-12 text-center">
-            <p className="text-foreground-secondary mb-4">You haven't started any inductions yet.</p>
-            <a
-              href="/inductions"
-              className="text-primary hover:text-primary-dark font-medium"
-            >
-              Browse Available Inductions →
-            </a>
-          </div>
+          <EmptyState
+            title="No Inductions Started"
+            description="You haven't started any inductions yet."
+            action={{
+              label: 'Browse Available Inductions',
+              onClick: () => router.push('/inductions'),
+              variant: 'primary'
+            }}
+          />
         ) : (
           <div className="space-y-6">
             {progress.map((item) => (
-              <div key={item.submission_id} className="bg-background rounded-lg shadow-md p-6">
+              <Card key={item.submission_id}>
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h2 className="text-xl font-semibold text-foreground">
@@ -84,8 +89,8 @@ export default function ProgressPage() {
                     )}
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-foreground-secondary">
-                      Status: <span className="font-medium">{item.status}</span>
+                    <div className="text-sm text-foreground-secondary mb-1">
+                      Status: <Badge variant={item.status === 'completed' ? 'success' : 'warning'}>{item.status}</Badge>
                     </div>
                     <div className="text-sm text-foreground-secondary mt-1">
                       {item.progress.completion_percentage}% Complete
@@ -94,30 +99,26 @@ export default function ProgressPage() {
                 </div>
 
                 <div className="mb-4">
-                  <div className="flex justify-between items-center mb-2">
+                  <ProgressBar
+                    value={item.progress.completion_percentage}
+                    showLabel
+                    variant={item.progress.completion_percentage === 100 ? 'success' : 'default'}
+                  />
+                  <div className="flex justify-between items-center mt-1">
                     <span className="text-sm text-foreground-secondary">Overall Progress</span>
                     <span className="text-sm text-foreground-secondary">
                       {item.progress.completed_chapters} / {item.progress.total_chapters} chapters
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-primary h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${item.progress.completion_percentage}%` }}
-                    />
-                  </div>
                 </div>
 
                 <div className="space-y-2">
                   <h3 className="text-sm font-semibold text-foreground mb-2">Chapters:</h3>
-                  {item.chapters.map((chapter: any, index: number) => (
-                    <div
+                  {item.chapters.map((chapter, index: number) => (
+                    <Card
                       key={chapter.id}
-                      className={`p-3 rounded border ${
-                        chapter.is_completed
-                          ? 'bg-green-50 border-green-200'
-                          : 'bg-gray-50 border-gray-200'
-                      }`}
+                      className={chapter.is_completed ? 'bg-green-50 border-green-200' : ''}
+                      padding="sm"
                     >
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
@@ -138,36 +139,33 @@ export default function ProgressPage() {
                                 : ''}
                             </span>
                           ) : (
-                            <button
+                            <Button
+                              size="sm"
+                              variant="outline"
                               onClick={() => handleContinue(item.submission_id, chapter.id, index)}
-                              className="text-xs text-primary hover:text-primary-dark font-medium"
                             >
                               {chapter.progress_percentage > 0 ? 'Continue' : 'Start'}
-                            </button>
+                            </Button>
                           )}
                         </div>
                       </div>
                       {!chapter.is_completed && chapter.progress_percentage > 0 && (
                         <div className="mt-2">
-                          <div className="w-full bg-gray-200 rounded-full h-1">
-                            <div
-                              className="bg-primary h-1 rounded-full"
-                              style={{ width: `${chapter.progress_percentage}%` }}
-                            />
-                          </div>
-                          <p className="text-xs text-foreground-secondary mt-1">
-                            {chapter.progress_percentage}% watched
-                          </p>
+                          <ProgressBar
+                            value={chapter.progress_percentage}
+                            size="sm"
+                            showLabel
+                          />
                         </div>
                       )}
-                    </div>
+                    </Card>
                   ))}
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         )}
-      </main>
+      </PageContainer>
     </div>
   );
 }
