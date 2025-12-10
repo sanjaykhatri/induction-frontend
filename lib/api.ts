@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// API responses from backend may vary, so we use 'any' for flexibility
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 export interface ApiResponse<T> {
@@ -37,10 +39,10 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string>),
     };
 
     // Ensure token is loaded from localStorage if not set
@@ -106,7 +108,7 @@ class ApiClient {
 
   async upload<T>(endpoint: string, formData: FormData, method: 'POST' | 'PUT' = 'POST'): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       Accept: 'application/json',
     };
 

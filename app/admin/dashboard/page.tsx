@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '../../providers';
 import { adminSubmissionApi } from '@/lib/api';
 import AdminHeader from '@/components/AdminHeader';
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const { user, loading: authLoading, isAdmin, logout } = useAuth();
+  const { user, loading: authLoading, isAdmin } = useAuth();
   const [stats, setStats] = useState({
     totalSubmissions: 0,
     completedSubmissions: 0,
@@ -84,12 +85,12 @@ export default function AdminDashboard() {
         </div>
 
         <div className="mt-8">
-          <a
+          <Link
             href="/admin/inductions"
             className="inline-block bg-primary text-white py-2 px-6 rounded-md hover:bg-primary-dark transition-colors"
           >
             Manage Inductions
-          </a>
+          </Link>
         </div>
       </main>
     </div>

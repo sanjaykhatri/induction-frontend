@@ -101,13 +101,25 @@ export default function QuestionsPage() {
         
         if (allQuestionsAnswered) {
           // All questions answered, find next uncompleted chapter
-          const nextChapter = await findNextUncompletedChapter(chapters, chapterIndex + 1);
+          const nextChapterIndex = await findNextUncompletedChapterIndex(chapters, chapterIndex + 1, submissionId);
           
-          if (nextChapter) {
-            if (nextChapter.needsVideo) {
-              router.push(`/inductions/${submissionId}/chapter/${nextChapter.index + 1}`);
-            } else {
-              router.push(`/inductions/${submissionId}/chapter/${nextChapter.index + 1}/questions`);
+          if (nextChapterIndex !== null && nextChapterIndex >= 0) {
+            // Found next uncompleted chapter
+            const nextChapter = chapters[nextChapterIndex];
+            
+            // Check if video is completed for next chapter
+            try {
+              const videoStatus = await videoCompletionApi.checkCompletion(nextChapter.id, submissionId);
+              if (videoStatus.is_completed) {
+                // Video completed, go to questions
+                router.push(`/inductions/${submissionId}/chapter/${nextChapterIndex + 1}/questions`);
+              } else {
+                // Video not completed, go to video
+                router.push(`/inductions/${submissionId}/chapter/${nextChapterIndex + 1}`);
+              }
+            } catch {
+              // If check fails, go to video
+              router.push(`/inductions/${submissionId}/chapter/${nextChapterIndex + 1}`);
             }
             return;
           } else {
