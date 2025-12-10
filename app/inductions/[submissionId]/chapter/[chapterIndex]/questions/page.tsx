@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '../../../../../providers';
-import { submissionApi, videoCompletionApi } from '@/lib/api';
+import { submissionApi, videoCompletionApi, SubmitAnswersResponse } from '@/lib/api';
 import Header from '@/components/Header';
 
 export default function QuestionsPage() {

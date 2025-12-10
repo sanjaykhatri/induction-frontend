@@ -186,13 +186,24 @@ export const inductionApi = {
     apiClient.post<any>(`/inductions/${inductionId}/start`),
 };
 
+export interface SubmitAnswersResponse {
+  message: string;
+  all_questions_answered: boolean;
+  status: string;
+  last_unanswered_chapter?: {
+    id: number;
+    title: string;
+    display_order: number;
+  } | null;
+}
+
 export const submissionApi = {
   get: (submissionId: number) =>
     apiClient.get<any>(`/submissions/${submissionId}`),
   getLastUnanswered: (submissionId: number) =>
     apiClient.get<any>(`/submissions/${submissionId}/last-unanswered`),
   submitAnswers: (submissionId: number, chapterId: number, answers: any[]) =>
-    apiClient.post(`/submissions/${submissionId}/answers`, { chapter_id: chapterId, answers }),
+    apiClient.post<SubmitAnswersResponse>(`/submissions/${submissionId}/answers`, { chapter_id: chapterId, answers }),
   complete: (submissionId: number) =>
     apiClient.post(`/submissions/${submissionId}/complete`),
 };
